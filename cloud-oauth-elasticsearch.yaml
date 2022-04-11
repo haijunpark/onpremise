@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: onha-cloud-oauth-elasticsearch
+  namespace: ds2  
+spec:
+  serviceName: onha-cloud-oauth-elasticsearch
+  replicas: 1
+  selector:
+    matchLabels:
+      service: onha-oauth-elasticsearch
+  template:
+    metadata:
+      labels:
+        service: onha-oauth-elasticsearch
+    spec:
+      terminationGracePeriodSeconds: 300
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: "app"
+                    operator: In
+                    values:
+                    - onha-cloud-oauth-elasticsearch
+              topologyKey: "kubernetes.io/hostname"
+      initContainers:
+      - name: fix-the-volume-permission
+        image: busybox
+        command:
+        - sh
+        - -c
+        - chown -R 1000:1000 /usr/share/elasticsearch/data
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: data
+          mountPath: /usr/share/elasticsearch/data
+      - name: increase-the-vm-max-map-count
+        image: busybox
+        command:
+        - sysctl
+        - -w
+        - vm.max_map_count=262144
+        securityContext:
+          privileged: true
+      - name: increase-the-ulimit
+        image: busybox
+        command:
+        - sh
+        - -c
+        - ulimit -n 65536
+        securityContext:
+          privileged: true
+      containers:
+      - name: onha-oauth-elasticsearch
+        image: onha.security365.com/security365/elasticsearch:7.9.3b
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9200
+          name: http
+        - containerPort: 9300
+          name: tcp
+        resources:
+          requests:
+            memory: 3Gi
+          limits:
+            memory: 4Gi
+        env:
+          - name: cluster.name
+            value: onha-cloud-oauth-elasticsearch
+          - name: node.name
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: discovery.seed_hosts
+            value: "onha-cloud-oauth-elasticsearch-0.onha-cloud-oauth-elasticsearch.ds2.svc.cluster.local"
+          - name: cluster.initial_master_nodes
+            value: "onha-cloud-oauth-elasticsearch-0"  
+          - name: ES_JAVA_OPTS
+            value: -Xms1g -Xmx1g
+        volumeMounts:
+        - name: data
+          mountPath: /usr/share/elasticsearch/data
+      imagePullSecrets:
+      - name : test123-secret
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      namespace: ds2
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: managed-premium
+      resources:
+        requests:
+          storage: 10Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+ name: onha-cloud-oauth-elasticsearch
+ namespace: ds2
+ labels:
+  service: onha-oauth-elasticsearch
+spec:
+ clusterIP: None
+ ports:
+ - port: 9200
+   name: http
+ - port: 9300
+   name: tcp
+ selector:
+  service: onha-oauth-elasticsearch
