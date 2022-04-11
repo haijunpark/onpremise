@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: cloud-oauth-config-onha
-  namespace: ds2
+  namespace: ontest
 data:
   SC_AUTH_HOST: "https://onhalogin.security365.com"
   SC_AUTH_PORT: "9000"
@@ -19,7 +19,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cloud-oauth-service-onha
-  namespace: ds2
+  namespace: ontest
   labels:
     app: cloud-oauth-service-onha
 spec:
@@ -34,7 +34,7 @@ spec:
     spec:
       containers:
       - name: cloud-oauth-service-onha
-        image: onha.security365.com/security365/cloud-oauth-service:20220120.1
+        image: kvm-harbor.security365.com/secaas/cloud-oauth-service:latest
         imagePullPolicy: Always
         resources:
           requests:
@@ -53,7 +53,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: cloud-oauth-service-onha
-  namespace: ds2
+  namespace: ontest
 spec:
   type: ClusterIP
   ports:
