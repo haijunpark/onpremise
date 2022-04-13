@@ -1,39 +1,39 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cloud-oauth-config-onha
+  name: cloud-oauth-config
   namespace: ontest
 data:
   SC_AUTH_HOST: "https://onhalogin.security365.com"
   SC_AUTH_PORT: "9000"
   SC_AUTH_INNER_URL: "http://0.0.0.0:8080"
   SC_AUTH_LOG_PATH: "/usr/local/tomcat/logs/SCCloudOAuthService"
-  ELASTIC_HOST: "onha-cloud-oauth-elasticsearch.ds2.svc.cluster.local"
+  ELASTIC_HOST: "cloud-common-elasticsearch.ontest.svc.cluster.local"
   ELASTIC_PORT: "9200"
   ELASTIC_ISHTTPS: "0"
-  ELASTIC_CLUSTERNAME: "onha-cloud-oauth-elasticsearch"
+  ELASTIC_CLUSTERNAME: "cloud-common-elasticsearch"
  # ELASTIC_USERNAME: "elastic01"
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cloud-oauth-service-onha
+  name: cloud-oauth-service
   namespace: ontest
   labels:
-    app: cloud-oauth-service-onha
+    app: cloud-oauth-service
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cloud-oauth-service-onha
+      app: cloud-oauth-service
   template:
     metadata:
       labels:
-        app: cloud-oauth-service-onha
+        app: cloud-oauth-service
     spec:
       containers:
-      - name: cloud-oauth-service-onha
+      - name: cloud-oauth-service
         image: kvm-harbor.security365.com/secaas/cloud-oauth-service:latest
         imagePullPolicy: Always
         resources:
@@ -45,14 +45,14 @@ spec:
         - containerPort: 8080
         envFrom:
         - configMapRef:
-            name: cloud-oauth-config-onha
+            name: cloud-oauth-config
       imagePullSecrets:
       - name : test123-secret
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: cloud-oauth-service-onha
+  name: cloud-oauth-service
   namespace: ontest
 spec:
   type: ClusterIP
@@ -60,4 +60,4 @@ spec:
   - port: 80
     targetPort: 8080
   selector:
-    app: cloud-oauth-service-onha
+    app: cloud-oauth-service
