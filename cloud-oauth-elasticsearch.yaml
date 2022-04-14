@@ -84,7 +84,7 @@ spec:
         - name: data
           mountPath: /usr/share/elasticsearch/data
       imagePullSecrets:
-      - name : test123-secret
+      - name : harbor-secret
   volumeClaimTemplates:
   - metadata:
       name: data
