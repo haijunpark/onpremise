@@ -47,7 +47,7 @@ spec:
         - configMapRef:
             name: cloud-oauth-config
       imagePullSecrets:
-      - name : test123-secret
+      - name : harbor-secret
 ---
 apiVersion: v1
 kind: Service
