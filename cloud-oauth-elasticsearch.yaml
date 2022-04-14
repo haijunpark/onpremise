@@ -55,7 +55,7 @@ spec:
           privileged: true
       containers:
       - name: oauth-elasticsearch
-        image: kvm-harbor.security365.com/elasticsearch/elasticsearch/elasticsearch:7.9.3b
+        image: kvm-harbor.security365.com/elasticsearch/elasticsearch:7.9.3b
         imagePullPolicy: Always
         ports:
         - containerPort: 9200
