@@ -34,7 +34,7 @@ spec:
     spec:
       containers:
       - name: cloud-oauth-service
-        image: kvm-harbor.security365.com/secaas/cloud-oauth-service:latest
+        image: kvm-harbor.security365.com/secaas/cloud-oauth-service:20220401.3
         imagePullPolicy: Always
         resources:
           requests:
